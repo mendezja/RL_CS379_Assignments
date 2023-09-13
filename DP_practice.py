@@ -11,16 +11,16 @@
 def waterTrapped(heights):
     size = len(heights)
     
-    left_max = list(height)
-    right_max = list(height)
+    left_max = list(heights)
+    right_max = list(heights)
 
     
     for i in range(1,size):
-        right_max[i] = max(right_max[i-1], heights[i])
+        left_max[i] = max(left_max[i-1], left_max[i])
 
-        l_i = (size-1) - i
+        r_i = (size-1) - i
 
-        left_max[l_i] = max(left_max[l_i +1], heights[l_i])
+        right_max[r_i] = max(right_max[r_i +1], right_max[r_i])
     
     return sum(map(lambda x,y,z: min(x-z, y-z), right_max, left_max, height))
 

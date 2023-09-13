@@ -1,0 +1,9 @@
+Marketing and Advertising Loop
+
+Agent - Company selling product
+Actions - Release Commercial (TV, Radio, Online), Design billboards (urban, rural, mix) x (sizes, designs), Social Media Campaign (instagram, X, Facebook, TikTok), Promote a sale (physical vs online)
+State - # Purchases of Product, User demographics, Market Trends, Product(s) being sold, Economy Metrics
+Reward - Based on sales made per month, takes into account cost of marketing 
+
+Challenges 
+The main challenge is the time scale mixed with the fluctuation of states during the time. Rewards would be based on sales made or increases in sales given advertisment actions. This means time scale would have to be at the smalled daily, but more likely weekly or monthly to insure the reward accuratly reflects the action. Additionally such an enviroment would be very difficult to acturatly model and thus may be very expensive given the larger time scale. Further there are many variations on the action types which may obscure or deminish the impact of a specific action. The enviroment state data may also be difficult to collect on regular basis.
