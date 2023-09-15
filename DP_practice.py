@@ -22,7 +22,7 @@ def waterTrapped(heights):
 
         right_max[r_i] = max(right_max[r_i +1], right_max[r_i])
     
-    return sum(map(lambda x,y,z: min(x-z, y-z), right_max, left_max, height))
+    return sum(map(lambda x,y,z: min(x, y) - z, right_max, left_max, height))
 
 
 
