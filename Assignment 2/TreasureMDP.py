@@ -54,23 +54,20 @@ class Agent():
             # Update reward
             self.award(-1)
 
-            i = 0
+            rand_val = random.random()
+            p = 0
 
             # Calculate new loc given current loc 
-            while True:
+            for i in range(len(STM[0])):
 
                 # Get probablility for each state transition
-                p = STM[self.loc][i]
+                p += STM[self.loc][i]
 
                 # If prob met, update location
-                if p != 0 and random.random() <= p:  
+                if STM[self.loc][i] != 0 and rand_val <= p: 
+                    # print(self.loc ," -> ", i , " | ", p)
                     self.loc = i
                     break
-                
-                # Update i
-                i +=1
-                i = i%len(STM)
-            
             
             # Check if terminal state
             if STATES[self.loc] == 5: 
@@ -79,7 +76,7 @@ class Agent():
                 self.award( 20 if self.t_found == 3 else 5)
 
                 # Return Episode total Reward
-                return "Terminal Reached, Reward: "+ str(self.reward)
+                return "Terminal Reached, Reward: {:.2f}".format(self.reward)
 
         # Return stats after action
         return "Reward: {:.2f} | State: {} | Action: {}".format(self.reward, self.loc, "Moved" if moved else "Dug")
