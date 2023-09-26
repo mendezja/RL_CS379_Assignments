@@ -22,6 +22,9 @@ STM =  [[0.0, 0.6, 0.1, 0.3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] ,
 STATES = [0,0,0,2,2,0,2,0,0,0,5]
 
 class Agent():
+
+    gamma = 0.9
+    
     def __init__(self):
         self.loc = 0
         self.timeStep = 0
@@ -31,50 +34,59 @@ class Agent():
     def act(self):
         
         moved = True
+        # totalReward = 0
         self.timeStep += 1
 
         # Determine action: Dig or Move
         if random.random() <= 0.1:
 
-            # if dig, check for treasure and update attributes
-            if STATES[self.loc] == 2 :
-                self.t_found += 1
-                self.reward += 2
-            
-                STATES[self.loc] = 0
-            
             # Update Moved to False
             moved = False
 
+            # if dig, check for treasure and update attributes
+            if STATES[self.loc] == 2 :
+                self.t_found += 1
+                self.award(2) 
+            
+                STATES[self.loc] = 0
+            
         else:
             # Update reward
-            self.reward -= 1
+            self.award(-1)
+
+            i = 0
 
             # Calculate new loc given current loc 
-            for i in range(len(STM[0])) :
+            while True:
 
                 # Get probablility for each state transition
                 p = STM[self.loc][i]
 
                 # If prob met, update location
-                if p != 0.0 and random.random() <= p: 
+                if p != 0 and random.random() <= p:  
                     self.loc = i
                     break
+                
+                # Update i
+                i +=1
+                i = i%len(STM)
             
             
             # Check if terminal state
             if STATES[self.loc] == 5: 
 
                 # Update Reward accordening
-                self.reward += 20 if self.t_found == 3 else 5
+                self.award( 20 if self.t_found == 3 else 5)
 
                 # Return Episode total Reward
                 return "Terminal Reached, Reward: "+ str(self.reward)
 
         # Return stats after action
-        return "Reward: {} | State: {} | Action: {}".format(self.reward, self.loc, "Moved" if moved else "Dug")
+        return "Reward: {:.2f} | State: {} | Action: {}".format(self.reward, self.loc, "Moved" if moved else "Dug")
         
-       
+    def award(self, quantity):
+        self.reward += (self.gamma ** self.timeStep) * quantity
+
 
 def main():
     # history store
@@ -85,6 +97,7 @@ def main():
         agent = Agent()
         print()
         print("Episode ", i + 1)
+        print("Reward:  0.00 | State: 0 | Action: None")
 
         while agent.timeStep < 25 and agent.loc !=10:
             action = agent.act()
