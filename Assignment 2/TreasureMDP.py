@@ -1,11 +1,6 @@
 # Author: Armando Mendez
 # CSCI 397 Treasure MDP
 
-# Questions: 
-# - Reward: -1 | State: 0 | Action: Moved how? 
-# - should the time step increase for both big and move
-# - how to implement gamma
-
 import random
 
 STM =  [[0.0, 0.6, 0.1, 0.3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] ,
@@ -19,11 +14,16 @@ STM =  [[0.0, 0.6, 0.1, 0.3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] ,
         [0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0] ,
         [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.5]]
 
+# 0 indicates no treaure, 2 indicates treaure, 5 indicates terminal state
+# States labeled by index
 STATES = [0,0,0,2,2,0,2,0,0,0,5]
 
-class Agent():
+GAMMA = 0.9
 
-    gamma = 0.9
+ACTIONS = ["dig", "move"]
+
+
+class Agent():
     
     def __init__(self):
         self.loc = 0
@@ -32,40 +32,28 @@ class Agent():
         self.t_found = 0
     
     def act(self):
-        
-        moved = True 
+
+        # Determine action: Dig (0) or Move (1)
+        action = 0 if random.random() <= 0.1 else 1
+
         self.timeStep += 1
 
-        # Determine action: Dig or Move
-        if random.random() <= 0.1:
+        # Dig
+        if action == 0:
 
-            # Update Moved to False
-            moved = False
-
-            # if dig, check for treasure and update attributes
+            # check for treasure and update attributes
             if STATES[self.loc] == 2 :
                 self.t_found += 1
                 self.award(2) 
             
                 STATES[self.loc] = 0
-            
+
+        # Move
         else:
             # Update reward
             self.award(-1)
 
-            rand_val = random.random()
-            p = 0
-
-            # Calculate new loc given current loc 
-            for i in range(len(STM[0])):
-
-                # Get probablility for each state transition
-                p += STM[self.loc][i]
-
-                # If prob met, update location
-                if STM[self.loc][i] != 0 and rand_val <= p:  
-                    self.loc = i
-                    break
+            self.updateLocation()
             
             # Check if terminal state
             if STATES[self.loc] == 5: 
@@ -73,31 +61,53 @@ class Agent():
                 # Update Reward accordening
                 self.award( 20 if self.t_found == 3 else 5)
 
-                # Return Episode total Reward
-                return "Terminal Reached, Reward: {:.2f}".format(self.reward)
+                # return "{:2d}. Reward: {:.2f} | State: Terminal | Action: {}".format(self.timeStep, self.reward, ACTIONS[action])
+
 
         # Return stats after action
-        return "Reward: {:.2f} | State: {} | Action: {}".format(self.reward, self.loc, "Moved" if moved else "Dug")
-        
+        stepReport = "{:2d}. Reward: {:.2f} | State: {} | Action: {}"
+        return stepReport.format(self.timeStep, self.reward, "T" if self.loc == 10 else self.loc, ACTIONS[action])
+
+
+
     def award(self, quantity):
-        self.reward += (self.gamma ** self.timeStep) * quantity
+        self.reward += (GAMMA ** self.timeStep) * quantity
+
+    def updateLocation(self):
+        current = self.loc
+
+        # generate rand value [0,1]
+        rand_val = random.random()
+        p = 0 
+
+        for i in range(len(STM[0])):
+
+                # Get probablility for each state transition
+                p += STM[current][i]
+
+                # If probability met, update location
+                if STM[current][i] != 0 and rand_val <= p:  
+                    self.loc = i
+                    return
+
+        print("Error: Agent failed to Move")
 
 
 def main():
-    # history store
+    # Store episodes history
     history = [[] for _ in range(10)]
 
     for i in range(10):
 
         agent = Agent()
-        print()
-        print("Episode ", i + 1)
-        print("Reward:  0.00 | State: 0 | Action: None")
+        print("\nEpisode ", i + 1)
+        print(" 0. Reward:  0.00 | State: 0 | Action: None")
 
         while agent.timeStep < 25 and agent.loc !=10:
             action = agent.act()
             print(action)
             history[i].append(action) 
+        print("Cumulative Reward: {:.2f}".format(agent.reward))
     
 
 
