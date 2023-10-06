@@ -114,7 +114,7 @@ def main():
             data = agent.act()
             history[i].append(data) 
 
-            print(stepReport.format(data))
+            print(stepReport.format(*data))
 
         print("Cumulative Reward: {:.2f}".format(agent.reward))
     
