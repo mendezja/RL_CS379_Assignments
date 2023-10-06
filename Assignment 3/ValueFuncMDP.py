@@ -74,50 +74,27 @@ class Agent():
     def updateLocation(self):
         current = self.loc
 
-        # generate rand value [0,1]
-        rand_val = random.random()
-        p = 0 
+        # Create temp array with connecting possible state vals
+        temp = np.ceil(STM[current]) * self.V_pi
 
-        for i in range(len(self.V_pi)):
+        # Choose the max state val & update location deterministicly
+        i = np.where(temp == max(temp))[0][0]
+        self.loc = i
 
-                # # Get probablility for each state transition
-                # p += STM[current][i]
-                # print(self.V_pi[i])
-
-                # If probability met, update location
-            if STM[current][i] != 0 and self.V_pi[i] > p:
-                p = self.V_pi[i]
-                self.loc = i
                     
-        # return
-        # print("Error: Agent failed to Move")
-    # def updateLocation(self):
-    #     current = self.loc
-
-    #     # generate rand value [0,1]
-    #     rand_val = random.random()
-    #     p = 0 
-
-    #     for i in range(len(STM[0])):
-
-    #             # Get probablility for each state transition
-    #             p += STM[current][i]
-
-    #             # If probability met, update location
-    #             if STM[current][i] != 0 and rand_val <= p:  
-    #                 self.loc = i
-    #                 return
-
-    #     print("Error: Agent failed to Move")
 
 
 def main():
+
 
     # Format prints
     stepReport = "{:2d}. Reward: {:.2f} | State: {} | Action: {}"
 
     # Show optimal path episode
     agent = Agent()
+
+    print("Value function:")
+    print( agent.V_pi)
 
     print("\nEpisode 1, optimal path using Value Function")
     print(stepReport.format(0, 0.00, "I", "null" ))
