@@ -1,0 +1,17 @@
+Best reward updated 0.000 -> 0.000
+Best reward updated 1.000 -> 1.000
+Solved in 13 iterations!
+
+State values:
+
+ 0.2071  0.1788  0.1876  0.1472 
+ 0.3011  0.0000  0.2306  0.0000 
+ 0.3544  0.4796  0.4649  0.0000 
+ 0.0000  0.6574  0.8205  0.0000  
+
+Policy:
+
+ LEFT   UP     LEFT   UP    
+ LEFT   LEFT   LEFT   LEFT  
+ UP     LEFT   DOWN   LEFT  
+ LEFT   RIGHT  DOWN   LEFT  
