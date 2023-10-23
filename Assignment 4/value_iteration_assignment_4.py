@@ -7,7 +7,9 @@ ENV_NAME = "FrozenLake-v1"
 GAMMA = 0.9 
 
 TEST_EPISODES = 20
-SEED = 42
+SEED = None
+SLIP = False
+VAL_ITERS = 1
 
 ACTIONS = { 0: 'LEFT ',
             1: 'DOWN ',
@@ -26,14 +28,15 @@ class Agent:
         self.numActions = self.env.action_space.n
 
         self.value_table = np.zeros(self.numStates)
-        # self.policy = np.zeros(self.numStates)
 
         self.transits = defaultdict(lambda: Counter())
         self.rewards = defaultdict(lambda: defaultdict(lambda: 0))
 
+
     @staticmethod
     def create_env(): 
-        return gym.make(ENV_NAME, is_slippery=True) #, seed = SEED)
+        return gym.make(ENV_NAME, is_slippery=SLIP) 
+
 
     
     def update_transits_rewards(self, state, action, new_state, reward):
@@ -55,10 +58,6 @@ class Agent:
 
         state = self.env.reset(seed=SEED)
 
-        # "S F F F ",
-        # "F H F H",
-        # "F F F H",
-        # "H F F G"
 
         # For count iterations, step agent w/randomly sampled action
         for i in range(count):
@@ -66,9 +65,9 @@ class Agent:
             randAction = self.env.action_space.sample()
 
             new_state, reward, terminal, _ = self.env.step(randAction)
+
             # print("\naction: ",ACTIONS[randAction], " state: ", state, " new state: ", new_state, " Reward: ", reward)
  
-
             # update transits & rewards
             self.update_transits_rewards(state, randAction, new_state, reward)
 
@@ -82,12 +81,15 @@ class Agent:
     def print_value_table(self):
 
         print("\nState values:")
-        str = ""
+        val_table = ""
+
         for i, val in enumerate(self.value_table):
             if i % 4 == 0:
-                str += ("\n")
-            str += (" %.4f " % (val))
-        print(str)
+                val_table += ("\n")
+
+            val_table += (" %.4f " % (val))
+
+        print(val_table)
 
         # for i, val in enumerate(self.value_table):
         #     print("State {:2}: {:.4f}".format(i, val) )
@@ -95,18 +97,10 @@ class Agent:
 
     def extract_policy(self):
  
-        # print(self.policy)
         policy = np.zeros(self.numStates)
         
-        for s in range(self.numStates): 
-
-
-            # action_values = np.zeros(self.numActions)
-            
-            # for a in range(self.numActions):
-            #     action_values[a] = self.calc_action_value(s,a)
-            
-            # print(s, action_values)
+        # for state in mdp, select action based off policy
+        for s in range(self.numStates):  
             policy[s] = self.select_action(s)
             
         return policy
@@ -132,12 +126,14 @@ class Agent:
     def calc_action_value(self, state, action):
         
         val = 0 
-        transit_counts = self.transits[(state, action)]
+        # Access all possible transit states
+        transit_states = self.transits[(state, action)]
 
-        total_count = sum(transit_counts.values())
+        total_count = sum(transit_states.values())
 
-        for s_next in transit_counts:             
-            prob = transit_counts[s_next] / total_count
+        # Iterate and use bellman to 
+        for s_next in transit_states:             
+            prob = transit_states[s_next] / total_count
             reward = self.rewards[(state,action)][s_next]
     
             val += prob * (reward + GAMMA * self.value_table[s_next]) 
@@ -150,12 +146,10 @@ class Agent:
         
         action_values = np.zeros(self.numActions)
             
+        # for a in A(s), calculate the action val
         for a in range(self.numActions):
 
-            # calculate the action values
             action_values[a] = self.calc_action_value(state,a)      
-
-            # print(s, action_values)
         
         # return best action
         return np.argmax(action_values)
@@ -180,36 +174,25 @@ class Agent:
             state, r_t, terminal, _ = env.step(action)
         
             # update reward
-            reward += r_t
+            reward +=  r_t 
 
         return reward
             
 
 
     def value_iteration(self): 
-
-        # while True:
-            # delta = 0
-        # for _ in range(10):
-
-        # Calc Bellman Update for all states
-        for s in range(self.numStates):
+        
+        for _ in range(VAL_ITERS):
+            # Calc Bellman Update for all states
+            for s in range(self.numStates):
+                    
+                # Record old state val for Delta
+                v = self.value_table[s]                 
                 
-            # Record old state val for Delta
-            v = self.value_table[s]                 
-            
-            # Find max action-value, assign to current state val
-            self.value_table[s] =  max([self.calc_action_value(s, a) for a in range(self.numActions)])
+                # Find max action-value, assign to current state val
+                self.value_table[s] =  max([self.calc_action_value(s, a) for a in range(self.numActions)])
 
-                # Update Delta    
-                # delta = max(delta, np.abs(v - self.value_table[s]))
-                # print("val-iter delta: ", delta)
-            
-            # if delta < THRESHOLD:
-            #     break
 
-        # print("val iteration Complete")
-        # print(self.value_table) 
 
 
 if __name__ == "__main__":
