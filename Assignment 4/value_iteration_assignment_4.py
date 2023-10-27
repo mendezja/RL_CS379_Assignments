@@ -8,7 +8,7 @@ GAMMA = 0.9
 
 TEST_EPISODES = 20
 SEED = None
-SLIP = False
+SLIP = True
 VAL_ITERS = 1
 
 ACTIONS = { 0: 'LEFT ',
