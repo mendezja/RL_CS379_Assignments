@@ -7,7 +7,7 @@ from tensorboardX import SummaryWriter
 
 ENV_NAME = "FrozenLake-v1"
 GAMMA = 0.9
-EPSILON = 0.8
+EPSILON = 0.9
 ALPHA = 0.2
 TEST_EPISODES = 20
 
@@ -21,6 +21,7 @@ ACTIONS = { 0: 'LEFT ',
             }
 
 class Agent:
+
     def __init__(self):
         # Initialize the environment using gym.make with ENV_NAME 
         self.env = gym.make(ENV_NAME, is_slippery=SLIP) 
@@ -40,6 +41,7 @@ class Agent:
         print("Gamma: {} | Espilon: {} | Alpha: {} | is_slippery: {} | seed: {}".format(GAMMA,EPSILON,ALPHA,SLIP,SEED))
 
     def sample_env(self):
+        # action = None
         # Select action using epsilon greedy exploration
         if random.random() <= EPSILON:
             action = self.env.action_space.sample()
@@ -58,32 +60,13 @@ class Agent:
 
 
     def best_value_and_action(self, state):
-        # Initialize variables best_value and best_action to None
-        # best_val =float ('-inf')
-        # best_action = None
 
-        # # Iterate over all possible actions in the environment's action space
-        # for a in range(self.numActions):
-        #     # Calculate the Q-value for each state-action pair
-        #     future_val = self.q_values[state][ a]
-            
-        #     # Update best_value and best_action based on the calculated Q-value
-        #     if future_val > best_val:
-        #         best_val = future_val
-        #         best_action = a
-
-        # # Return best_value and best_action
-        # return (best_val, best_action)
-
-        # action_values = np.zeros(self.numActions)
-            
-        # for a in A(s), calculate the action val
-        # for a in range(self.numActions):
-
-        #     action_values[a] =  self.q_values[state][a]#[(state, a)]
-        
-        # return best action
         best_a = np.argmax(self.q_values[state])
+
+        # if all equal, return random action
+        if len(set(self.q_values[state])) ==1: 
+            best_a = self.env.action_space.sample()
+
         return (self.q_values[state][best_a], best_a)
 
         
@@ -127,9 +110,19 @@ class Agent:
     def print_values(self):
         # Print the Q-values in a readable format 
         print ("Q Values")
-        for s in range(self.numStates): 
+        # for s in range(self.numStates): 
+        #     for a in range(self.numActions):
+        #         print("(State: {}, Action: {}) -> {}".format(s, ACTIONS[a], self.q_values[s][a]))
+
+        str = "|   |"
+        for a in range(self.numActions):
+            str += (" {} |".format (ACTIONS[a]))
+        for s in range(self.numStates):
+            # if s % 4 == 0:
+            str += ("\n| {} |".format(s)) 
             for a in range(self.numActions):
-                print("(State: {}, Action: {}) -> {}".format(s, ACTIONS[a], self.q_values[s][a]))
+                str += (" %.3f |"% (self.q_values[s][a]))
+        print(str)
 
         
 
@@ -154,9 +147,9 @@ class Agent:
         str = ""
         for s in range(self.numStates):
             if s % 4 == 0:
-                str += ("\n")
+                str += ("\n|")
             _, action = self.best_value_and_action(s)
-            str += (" {} ".format (ACTIONS[action]))
+            str += (" {} |".format (ACTIONS[action]))
         print(str)
 
         # Return the policy dictionary
